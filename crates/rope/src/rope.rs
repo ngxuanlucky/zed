@@ -3,6 +3,8 @@ mod offset_utf16;
 mod point;
 mod point_utf16;
 mod unclipped;
+#[cfg(test)]
+mod tests;
 
 use heapless::Vec as ArrayVec;
 use rayon::iter::{IntoParallelIterator, ParallelIterator as _};
