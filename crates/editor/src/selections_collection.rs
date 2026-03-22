@@ -311,21 +311,29 @@ impl SelectionsCollection {
         self.pending
             .as_ref()
             .map(|pending| pending.selection.clone())
-            .unwrap_or_else(|| self.disjoint.first().cloned().unwrap())
+            .unwrap_or_else(|| {
+                self.disjoint.first()
+                    .cloned()
+                    .expect("selections should always have at least one selection")
+            })
     }
 
     pub fn first<D>(&self, snapshot: &DisplaySnapshot) -> Selection<D>
     where
         D: MultiBufferDimension + Sub + AddAssign<<D as Sub>::Output> + Ord,
     {
-        self.all(snapshot).first().unwrap().clone()
+        self.all(snapshot).first()
+            .cloned()
+            .expect("selections should always have at least one selection")
     }
 
     pub fn last<D>(&self, snapshot: &DisplaySnapshot) -> Selection<D>
     where
         D: MultiBufferDimension + Sub + AddAssign<<D as Sub>::Output> + Ord,
     {
-        self.all(snapshot).last().unwrap().clone()
+        self.all(snapshot).last()
+            .cloned()
+            .expect("selections should always have at least one selection")
     }
 
     /// Returns a list of (potentially backwards!) ranges representing the selections.
@@ -1194,8 +1202,10 @@ fn resolve_selections_point<'a>(
         .summaries_for_anchors::<Point, _>(to_summarize.flat_map(|s| [&s.start, &s.end]))
         .into_iter();
     selections.map(move |s| {
-        let start = summaries.next().unwrap();
-        let end = summaries.next().unwrap();
+        let start = summaries.next()
+            .expect("should have start position for each selection");
+        let end = summaries.next()
+            .expect("should have end position for each selection");
         assert!(
             start <= end,
             "anchors: start: {:?}, end: {:?}; resolved to: start: {:?}, end: {:?}",
@@ -1273,8 +1283,10 @@ where
                 [start, end]
             }));
     selections.map(move |s| {
-        let start = converted_endpoints.next().unwrap();
-        let end = converted_endpoints.next().unwrap();
+        let start = converted_endpoints.next()
+            .expect("should have start position for each selection");
+        let end = converted_endpoints.next()
+            .expect("should have end position for each selection");
         assert!(start <= end, "start: {:?}, end: {:?}", start, end);
         Selection {
             id: s.id,

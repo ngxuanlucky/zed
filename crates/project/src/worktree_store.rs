@@ -555,7 +555,9 @@ impl WorktreeStore {
             self.loading_worktrees
                 .insert(abs_path.clone(), task.shared());
         }
-        let task = self.loading_worktrees.get(&abs_path).unwrap().clone();
+        let task = self.loading_worktrees.get(&abs_path)
+            .expect("loading_worktrees should always contain the path we just inserted")
+            .clone();
         cx.spawn(async move |this, cx| {
             let result = task.await;
             this.update(cx, |this, _| this.loading_worktrees.remove(&abs_path))

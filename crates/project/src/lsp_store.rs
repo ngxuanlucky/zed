@@ -1433,7 +1433,8 @@ impl LocalLspStore {
         // Do not allow multiple concurrent code actions requests for the
         // same buffer.
         lsp_store.update(cx, |this, cx| {
-            let this = this.as_local_mut().unwrap();
+            let this = this.as_local_mut()
+                .expect("lsp_store should be local when formatting buffers");
             buffers.retain(|buffer| {
                 this.buffers_being_formatted
                     .insert(buffer.read(cx).remote_id())
@@ -1445,7 +1446,8 @@ impl LocalLspStore {
             let buffers = &buffers;
             move || {
                 this.update(&mut cx, |this, cx| {
-                    let this = this.as_local_mut().unwrap();
+                    let this = this.as_local_mut()
+                        .expect("lsp_store should be local when cleaning up buffer formatting");
                     for buffer in buffers {
                         this.buffers_being_formatted
                             .remove(&buffer.read(cx).remote_id());
@@ -10996,7 +10998,9 @@ impl LspStore {
                 all: false,
             });
             cx.background_spawn(async move {
-                let _ = request.await?;
+                if let Err(err) = request.await {
+                    log::error!("Failed to send language server selector update: {err}");
+                }
                 Ok(())
             })
         } else {

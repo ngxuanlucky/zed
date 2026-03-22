@@ -776,13 +776,17 @@ impl DapStore {
 
         cx.background_spawn(async move {
             if !shutdown_children.is_empty() {
-                let _ = join_all(shutdown_children).await;
+                if let Err(err) = join_all(shutdown_children).await.into_iter().find(|r| r.is_err()) {
+                    log::error!("Failed to shutdown child debug sessions: {err}");
+                }
             }
 
             shutdown_task.await;
 
             if let Some(parent_task) = shutdown_parent_task {
-                parent_task.await?;
+                if let Err(err) = parent_task.await {
+                    log::error!("Failed to shutdown parent debug session: {err}");
+                }
             }
 
             Ok(())

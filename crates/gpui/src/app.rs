@@ -519,7 +519,8 @@ impl SystemWindowTabController {
             return;
         };
 
-        let current_index = tabs.iter().position(|tab| tab.id == id).unwrap();
+        let current_index = tabs.iter().position(|tab| tab.id == id)
+            .expect("current window id should be found in tabs list");
         let next_index = (current_index + 1) % tabs.len();
 
         let _ = &tabs[next_index].handle.update(cx, |_, window, _| {
@@ -534,7 +535,8 @@ impl SystemWindowTabController {
             return;
         };
 
-        let current_index = tabs.iter().position(|tab| tab.id == id).unwrap();
+        let current_index = tabs.iter().position(|tab| tab.id == id)
+            .expect("current window id should be found in tabs list");
         let previous_index = if current_index == 0 {
             tabs.len() - 1
         } else {
@@ -1549,7 +1551,8 @@ impl App {
         self.update(|cx| {
             let mut window = cx.windows.get_mut(id)?.take()?;
 
-            let root_view = window.root.clone().unwrap();
+            let root_view = window.root.clone()
+                .expect("window should have a root view when updating");
 
             cx.window_update_stack.push(window.handle.id);
             let result = update(root_view, &mut window, cx);

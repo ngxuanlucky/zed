@@ -4166,8 +4166,10 @@ impl GetDocumentDiagnostics {
             .related_information
             .into_iter()
             .map(|info| {
-                let start = info.location_range_start.unwrap();
-                let end = info.location_range_end.unwrap();
+                let start = info.location_range_start
+                    .expect("related information location start should be present");
+                let end = info.location_range_end
+                    .expect("related information location end should be present");
 
                 lsp::DiagnosticRelatedInformation {
                     location: lsp::Location {
@@ -4175,7 +4177,9 @@ impl GetDocumentDiagnostics {
                             start: point_to_lsp(PointUtf16::new(start.row, start.column)),
                             end: point_to_lsp(PointUtf16::new(end.row, end.column)),
                         },
-                        uri: lsp::Uri::from_str(&info.location_url.unwrap()).unwrap(),
+                        uri: lsp::Uri::from_str(&info.location_url
+                            .expect("related information location URL should be present"))
+                            .expect("location URL should be valid"),
                     },
                     message: info.message,
                 }
@@ -4194,7 +4198,8 @@ impl GetDocumentDiagnostics {
 
         Ok(lsp::Diagnostic {
             range: language::range_to_lsp(range)?,
-            severity: match proto::lsp_diagnostic::Severity::from_i32(diagnostic.severity).unwrap()
+            severity: match proto::lsp_diagnostic::Severity::from_i32(diagnostic.severity)
+                .expect("severity should be a valid diagnostic severity value")
             {
                 proto::lsp_diagnostic::Severity::Error => Some(lsp::DiagnosticSeverity::ERROR),
                 proto::lsp_diagnostic::Severity::Warning => Some(lsp::DiagnosticSeverity::WARNING),

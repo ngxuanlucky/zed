@@ -922,7 +922,8 @@ impl BlockMap {
             // Ensure the edit starts at a transform boundary.
             // If the edit starts within an isomorphic transform, preserve its prefix
             // If the edit lands within a replacement block, expand the edit to include the start of the replaced input range
-            let transform = cursor.item().unwrap();
+            let transform = cursor.item()
+                .expect("cursor should always have a current item when iterating");
             let transform_rows_before_edit = old_start - *cursor.start();
             if transform_rows_before_edit > RowDelta(0) {
                 if transform.block.is_none() {

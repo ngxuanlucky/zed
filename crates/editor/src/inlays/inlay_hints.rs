@@ -2045,7 +2045,9 @@ pub mod tests {
                     .unwrap();
             }));
         }
-        let _ = future::join_all(edits).await;
+        if let Err(err) = future::join_all(edits).await.into_iter().find(|r| r.is_err()) {
+            log::error!("Failed to apply some inlay hint edits: {err}");
+        }
         cx.executor().run_until_parked();
 
         editor

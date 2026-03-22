@@ -1701,8 +1701,12 @@ impl Session {
             let task = cx
                 .background_executor()
                 .spawn(async move {
-                    let _ = task.await?;
-                    Some(())
+                    if let Err(err) = task.await {
+                        log::error!("Debugger command failed: {err}");
+                        None
+                    } else {
+                        Some(())
+                    }
                 })
                 .shared();
 

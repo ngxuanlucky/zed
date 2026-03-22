@@ -702,7 +702,8 @@ impl LocalBufferStore {
                     }
 
                     this.path_to_buffer_id.insert(project_path, buffer_id);
-                    let this = this.as_local_mut().unwrap();
+                    let this = this.as_local_mut()
+                        .expect("buffer store should be local when opening a local buffer");
                     if let Some(entry_id) = entry_id {
                         this.local_buffer_ids_by_entry_id
                             .insert(entry_id, buffer_id);
@@ -781,7 +782,8 @@ impl BufferStore {
                 worktree_store: worktree_store.clone(),
                 _subscription: cx.subscribe(&worktree_store, |this, _, event, cx| {
                     if let WorktreeStoreEvent::WorktreeAdded(worktree) = event {
-                        let this = this.as_local_mut().unwrap();
+                        let this = this.as_local_mut()
+                            .expect("buffer store should be local when worktree is added");
                         this.subscribe_to_worktree(worktree, cx);
                     }
                 }),

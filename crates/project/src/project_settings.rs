@@ -612,45 +612,67 @@ pub struct LspPullDiagnosticsSettings {
 impl Settings for ProjectSettings {
     fn from_settings(content: &settings::SettingsContent) -> Self {
         let project = &content.project.clone();
-        let diagnostics = content.diagnostics.as_ref().unwrap();
-        let lsp_pull_diagnostics = diagnostics.lsp_pull_diagnostics.as_ref().unwrap();
-        let inline_diagnostics = diagnostics.inline.as_ref().unwrap();
+        let diagnostics = content.diagnostics.as_ref()
+            .expect("diagnostics settings should always be present in settings content");
+        let lsp_pull_diagnostics = diagnostics.lsp_pull_diagnostics.as_ref()
+            .expect("lsp_pull_diagnostics settings should always be present");
+        let inline_diagnostics = diagnostics.inline.as_ref()
+            .expect("inline_diagnostics settings should always be present");
 
-        let git = content.git.as_ref().unwrap();
+        let git = content.git.as_ref()
+            .expect("git settings should always be present in settings content");
         let git_enabled = {
             GitEnabledSettings {
-                status: git.enabled.as_ref().unwrap().is_git_status_enabled(),
-                diff: git.enabled.as_ref().unwrap().is_git_diff_enabled(),
+                status: git.enabled.as_ref()
+                    .expect("git.enabled settings should always be present")
+                    .is_git_status_enabled(),
+                diff: git.enabled.as_ref()
+                    .expect("git.enabled settings should always be present")
+                    .is_git_diff_enabled(),
             }
         };
         let git_settings = GitSettings {
             enabled: git_enabled,
-            git_gutter: git.git_gutter.unwrap(),
+            git_gutter: git.git_gutter
+                .expect("git.git_gutter settings should always be present"),
             gutter_debounce: git.gutter_debounce.unwrap_or_default(),
             inline_blame: {
-                let inline = git.inline_blame.unwrap();
+                let inline = git.inline_blame
+                    .expect("git.inline_blame settings should always be present");
                 InlineBlameSettings {
-                    enabled: inline.enabled.unwrap(),
-                    delay_ms: inline.delay_ms.unwrap(),
-                    padding: inline.padding.unwrap(),
-                    min_column: inline.min_column.unwrap(),
-                    show_commit_summary: inline.show_commit_summary.unwrap(),
+                    enabled: inline.enabled
+                        .expect("inline_blame.enabled should always be present"),
+                    delay_ms: inline.delay_ms
+                        .expect("inline_blame.delay_ms should always be present"),
+                    padding: inline.padding
+                        .expect("inline_blame.padding should always be present"),
+                    min_column: inline.min_column
+                        .expect("inline_blame.min_column should always be present"),
+                    show_commit_summary: inline.show_commit_summary
+                        .expect("inline_blame.show_commit_summary should always be present"),
                 }
             },
             blame: {
-                let blame = git.blame.unwrap();
+                let blame = git.blame
+                    .expect("git.blame settings should always be present");
                 BlameSettings {
-                    show_avatar: blame.show_avatar.unwrap(),
+                    show_avatar: blame.show_avatar
+                        .expect("blame.show_avatar should always be present"),
                 }
             },
             branch_picker: {
-                let branch_picker = git.branch_picker.unwrap();
+                let branch_picker = git.branch_picker
+                    .expect("git.branch_picker settings should always be present");
                 BranchPickerSettings {
-                    show_author_name: branch_picker.show_author_name.unwrap(),
+                    show_author_name: branch_picker.show_author_name
+                        .expect("branch_picker.show_author_name should always be present"),
                 }
             },
-            hunk_style: git.hunk_style.unwrap(),
-            path_style: git.path_style.unwrap().into(),
+            hunk_style: git.hunk_style
+                .expect("git.hunk_style should always be present"),
+            path_style: git.path_style
+                .expect("git.path_style should always be present")
+                .into(),
             worktree_directory: git
                 .worktree_directory
                 .clone()
@@ -674,32 +696,32 @@ impl Settings for ProjectSettings {
                 button: content
                     .global_lsp_settings
                     .as_ref()
-                    .unwrap()
+                    .expect("global_lsp_settings should always be present")
                     .button
-                    .unwrap(),
+                    .expect("global_lsp_settings.button should always be present"),
                 request_timeout: content
                     .global_lsp_settings
                     .as_ref()
-                    .unwrap()
+                    .expect("global_lsp_settings should always be present")
                     .request_timeout
-                    .unwrap(),
+                    .expect("global_lsp_settings.request_timeout should always be present"),
                 notifications: LspNotificationSettings {
                     dismiss_timeout_ms: content
                         .global_lsp_settings
                         .as_ref()
-                        .unwrap()
+                        .expect("global_lsp_settings should always be present")
                         .notifications
                         .as_ref()
-                        .unwrap()
+                        .expect("global_lsp_settings.notifications should always be present")
                         .dismiss_timeout_ms,
                 },
                 semantic_token_rules: content
                     .global_lsp_settings
                     .as_ref()
-                    .unwrap()
+                    .expect("global_lsp_settings should always be present")
                     .semantic_token_rules
                     .as_ref()
-                    .unwrap()
+                    .expect("global_lsp_settings.semantic_token_rules should always be present")
                     .clone(),
             },
             dap: project
@@ -709,26 +731,47 @@ impl Settings for ProjectSettings {
                 .map(|(key, value)| (DebugAdapterName(key.into()), DapSettings::from(value)))
                 .collect(),
             diagnostics: DiagnosticsSettings {
-                button: diagnostics.button.unwrap(),
-                include_warnings: diagnostics.include_warnings.unwrap(),
+                button: diagnostics.button
+                    .expect("diagnostics.button should always be present"),
+                include_warnings: diagnostics.include_warnings
+                    .expect("diagnostics.include_warnings should always be present"),
                 lsp_pull_diagnostics: LspPullDiagnosticsSettings {
-                    enabled: lsp_pull_diagnostics.enabled.unwrap(),
-                    debounce_ms: lsp_pull_diagnostics.debounce_ms.unwrap().0,
+                    enabled: lsp_pull_diagnostics.enabled
+                        .expect("lsp_pull_diagnostics.enabled should always be present"),
+                    debounce_ms: lsp_pull_diagnostics.debounce_ms
+                        .expect("lsp_pull_diagnostics.debounce_ms should always be present")
+                        .0,
                 },
                 inline: InlineDiagnosticsSettings {
-                    enabled: inline_diagnostics.enabled.unwrap(),
-                    update_debounce_ms: inline_diagnostics.update_debounce_ms.unwrap().0,
-                    padding: inline_diagnostics.padding.unwrap(),
-                    min_column: inline_diagnostics.min_column.unwrap(),
+                    enabled: inline_diagnostics.enabled
+                        .expect("inline_diagnostics.enabled should always be present"),
+                    update_debounce_ms: inline_diagnostics.update_debounce_ms
+                        .expect("inline_diagnostics.update_debounce_ms should always be present")
+                        .0,
+                    padding: inline_diagnostics.padding
+                        .expect("inline_diagnostics.padding should always be present"),
+                    min_column: inline_diagnostics.min_column
+                        .expect("inline_diagnostics.min_column should always be present"),
                     max_severity: inline_diagnostics.max_severity.map(Into::into),
                 },
             },
             git: git_settings,
-            node: content.node.clone().unwrap().into(),
-            load_direnv: project.load_direnv.clone().unwrap(),
+            node: content.node.clone()
+                .expect("node settings should always be present")
+                .into(),
+            load_direnv: project.load_direnv.clone()
+                .expect("load_direnv settings should always be present"),
             session: SessionSettings {
-                restore_unsaved_buffers: content.session.unwrap().restore_unsaved_buffers.unwrap(),
-                trust_all_worktrees: content.session.unwrap().trust_all_worktrees.unwrap(),
+                restore_unsaved_buffers: content.session
+                    .as_ref()
+                    .expect("session settings should always be present")
+                    .restore_unsaved_buffers
+                    .expect("session.restore_unsaved_buffers should always be present"),
+                trust_all_worktrees: content.session
+                    .as_ref()
+                    .expect("session settings should always be present")
+                    .trust_all_worktrees
+                    .expect("session.trust_all_worktrees should always be present"),
             },
         }
     }
